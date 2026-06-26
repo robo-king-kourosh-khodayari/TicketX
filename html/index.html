@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ticket X</title>
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="InShot_20260427_1513166199.png?v=1">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+    margin:0;
+    font-family:tahoma;
+    direction:rtl;
+    background:url("ccvcgr.png") no-repeat center center fixed;
+    background-size:cover;
+}
+
+.overlay{
+    backdrop-filter: blur(10px);
+    background: rgba(0,0,0,0.55);
+    min-height:100vh;
+    padding:20px;
+    position:relative;
+}
+
+/* دکمه تنظیمات بالا-چپ */
+.settings-btn{
+    position:absolute;
+    top:15px;
+    left:15px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:rgba(0,0,0,0.6);
+    color:#fff;
+    padding:8px 12px;
+    border-radius:20px;
+    cursor:pointer;
+    font-size:14px;
+    z-index:1000;
+}
+
+.settings-btn-icon{
+    font-size:18px;
+}
+
+/* منوی تنظیمات */
+.settings-menu{
+    position:absolute;
+    top:50px;
+    left:15px;
+    background:#ffffff;
+    color:#000;
+    border-radius:12px;
+    padding:12px 14px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.3);
+    z-index:1000;
+    width:260px;
+    display:none;
+}
+.settings-section-title{
+    font-weight:bold;
+    margin:6px 0;
+    font-size:13px;
+}
+.settings-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:8px;
+}
+.settings-menu button{
+    padding:6px 10px;
+    border-radius:8px;
+    border:none;
+    cursor:pointer;
+    font-size:12px;
+    background:#0869f1;
+    color:#fff;
+}
+.settings-menu button:hover{
+    background:#0657c9;
+}
+.settings-menu input[type="file"]{
+    font-size:11px;
+}
+
+/* لوگوها */
+.header-logos{
+    position:relative;
+    text-align:center;
+    margin-bottom:20px;
+    height:100px;
+}
+
+.logo-ticketx{
+    width:240px;
+    border-radius:20px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.2);
+}
+
+.logo-plane{
+    position:absolute;
+    top:0;
+    right:1px;
+    width:50px;
+    height:50px;
+    object-fit:contain;
+    background:rgba(255, 255, 255, 0.15);
+    border-radius:50%;
+    padding:10px;
+    border:1px solid rgba(255,255,255,0.3);
+}
+
+/* کانتینر اصلی */
+.container{
+    max-width:1000px;
+    margin:auto;
+    background:rgba(255,255,255,0.08);
+    border-radius:20px;
+    padding:30px;
+    box-shadow:0 0 40px rgba(0,0,0,0.4);
+    color:white;
+}
+
+h2{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+/* گرید */
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+}
+
+/* هر blob / کارت فیلد */
+.field-card{
+    background:rgba(0,0,0,0.25);
+    border-radius:14px;
+    padding:10px 10px 8px;
+    position:relative;
+}
+
+/* هدر آیکون بالای هر blob */
+.field-card-header{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom:6px;
+    font-size:12px;
+    opacity:0.9;
+}
+.field-card-header-icon{
+    font-size:16px;
+}
+.field-card-header-text{
+    font-weight:bold;
+}
+
+/* خود input/select */
+.field-card select,
+.field-card input{
+    width:100%;
+    padding:9px;
+    border-radius:10px;
+    border:none;
+    font-size:14px;
+    background:rgba(255, 255, 255, 0.9);
+    color:black;
+    box-sizing:border-box;
+}
+
+button[type="submit"]{
+    margin-top:20px;
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    font-size:16px;
+    background:linear-gradient(45deg,#00c6ff,#0072ff);
+    color:#000;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+button[type="submit"]:hover{
+    opacity:0.9;
+}
+
+.result{
+    margin-top:25px;
+    padding:20px;
+    background:rgba(255,255,255,0.1);
+    border-radius:15px;
+    display:none;
+}
+
+.buy{color:#00ff9d;font-weight:bold;}
+.hold{color:#ffd166;font-weight:bold;}
+.wait{color:#ff6b6b;font-weight:bold;}
+
+.error-box{
+    margin-top:20px;
+    padding:12px;
+    border-radius:12px;
+    background:rgba(255,0,0,0.15);
+    color:#ffd5d5;
+    display:none;
+}
+
+canvas{
+    margin-top:20px;
+}
+
+@media(max-width:600px){
+    .container{
+        padding:15px;
+    }
+    .logo-plane{
+        right:3px;
+        width:50px;
+        height:50px;
+    }
+    .settings-menu{
+        width:220px;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="overlay" id="overlay">
+
+    <div class="settings-btn" onclick="toggleSettingsMenu()">
+        <span class="settings-btn-icon">⚙️</span>
+        <span id="settings_label">تنظیمات</span>
+    </div>
+
+    <div class="settings-menu" id="settingsMenu" onclick="event.stopPropagation()">
+        <div class="settings-section-title" id="settings_language_title">زبان</div>
+        <div class="settings-row">
+            <button type="button" onclick="setLanguage('fa')">فارسی</button>
+            <button type="button" onclick="setLanguage('tr')">Türkçe</button>
+            <button type="button" onclick="setLanguage('en')">English</button>
+        </div>
+
+        <div class="settings-section-title" id="settings_customize_title">شخصی‌سازی برنامه</div>
+        <div class="settings-row">
+            <button type="button" onclick="document.getElementById('bgInput').click()" id="settings_bg_btn">
+                پس‌زمینه برنامه
+            </button>
+            <input type="file" id="bgInput" accept="image/*" style="display:none" onchange="changeBackground(event)">
+        </div>
+
+        <div class="settings-row" style="display:block;">
+            <label for="blurRange" id="settings_blur_label">مقدار تاری پس‌زمینه</label>
+            <input type="range" id="blurRange" min="0" max="30" value="10" oninput="changeBlur(this.value)" style="width:100%;">
+        </div>
+
+        <div class="settings-row">
+            <button type="button" onclick="resetSettings()" id="settings_reset_btn">
+                بازگشت به تنظیمات اولیه
+            </button>
+        </div>
+    </div>
+
+    <div class="header-logos">
+        <img src="eeeeeee.png" class="logo-plane" alt="Plane Logo" />
+        <img src="ddddd.png" class="logo-ticketx" alt="TicketX Logo" />
+    </div>
+
+    <div class="container">
+        <h2 id="title_text">✈ سیستم پیش‌بینی هوشمند قیمت بلیط</h2>
+
+        <form id="flightForm">
+            <div class="grid">
+
+                <div class="field-card">
+                    <div class="field-card-header">
+                        <span class="field-card-header-icon">📍</span>
+                        <span class="field-card-header-text" id="origin_label">مبدا</span>
+                    </div>
+                    <select id="origin">
+                        <option>ANK</option>
+                        <option>ESB</option>
+                        <option>IST</option>
+                        <option>ADB</option>
+                        <option>IZM</option>
+                        <option>AYT</option>
+                    </select>
+                </div>
+
+                <div class="field-card">
+                    <div class="field-card-header">
+                        <span class="field-card-header-icon">🎯</span>
+                        <span class="field-card-header-text" id="destination_label">مقصد</span>
+                    </div>
+                    <select id="destination">
+                        <option>ANK</option>
+                        <option>ESB</option>
+                        <option>IST</option>
+                        <option>ADB</option>
+                        <option>IZM</option>
+                        <option>AYT</option>
+                    </select>
+                </div>
+
+                <div class="field-card">
+                    <div class="field-card-header">
+                        <span class="field-card-header-icon">🛫</span>
+                        <span class="field-card-header-text" id="airline_label">ایرلاین</span>
+                    </div>
+                    <select id="airline">
+                        <option>Turkish Airlines</option>
+                        <option>Pegasus</option>
+                        <option>AnadoluJet</option>
+                        <option>SunExpress</option>
+                    </select>
+                </div>
+
+                <div class="field-card">
+                    <div class="field-card-header">
+                        <span class="field-card-header-icon">💺</span>
+                        <span class="field-card-header-text" id="class_label">کلاس پروازی</span>
+                    </div>
+                    <select id="class_type">
+                        <option>Economy</option>
+                        <option>Business</option>
+                    </select>
+                </div>
+
+                <div class="field-card">
+                    <div class="field-card-header">
+                        <span class="field-card-header-icon">⏱️</span>
+                        <span class="field-card-header-text" id="stops_label">توقف‌ها</span>
+                    </div>
+                    <select id="stops">
+                        <option value="0" id="stops_direct_option">Direct</option>
+                        <option value="1" id="stops_one_option">1 Stop</option>
+                    </select>
+                </div>
+
+                <div class="field-card">
+                    <div class="field-card-header">
+                        <span class="field-card-header-icon">📅</span>
+                        <span class="field-card-header-text" id="days_to_flight_label">روز تا پرواز</span>
+                    </div>
+                    <input type="number" id="days_to_flight" value="15">
+                </div>
+
+                <div class="field-card">
+                    <div class="field-card-header">
+                        <span class="field-card-header-icon">⏰</span>
+                        <span class="field-card-header-text" id="departure_time_label">ساعت پرواز</span>
+                    </div>
+                    <input type="time" id="departure_time">
+                </div>
+
+                <div class="field-card">
+                    <div class="field-card-header">
+                        <span class="field-card-header-icon">🛒</span>
+                        <span class="field-card-header-text" id="purchase_date_label">تاریخ خرید</span>
+                    </div>
+                    <input type="date" id="purchase_date">
+                </div>
+
+                <div class="field-card">
+                    <div class="field-card-header">
+                        <span class="field-card-header-icon">🗓️</span>
+                        <span class="field-card-header-text" id="flight_date_label">تاریخ پرواز</span>
+                    </div>
+                    <input type="date" id="flight_date">
+                </div>
+
+                <div class="field-card">
+                    <div class="field-card-header">
+                        <span class="field-card-header-icon">📆</span>
+                        <span class="field-card-header-text" id="day_of_week_label">روز هفته</span>
+                    </div>
+                    <select id="day_of_week">
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <button type="submit" id="submit_btn">پیش‌بینی قیمت</button>
+        </form>
+
+        <div class="error-box" id="errorBox"></div>
+
+        <div class="result" id="resultBox">
+            <h3 id="todayPrice"></h3>
+            <h3 id="signalText"></h3>
+            <p id="message"></p>
+            <canvas id="forecastChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+let chart;
+let defaultBackground = 'url("ccvcgr.png")';
+let defaultBlur = 10;
+let currentLang = 'fa';
+
+const API_BASE_URL = "http://127.0.0.1:5000";
+
+const i18n = {
+    fa: {
+        settings_label: "تنظیمات",
+        settings_language_title: "زبان",
+        settings_customize_title: "شخصی‌سازی برنامه",
+        settings_bg_btn: "پس‌زمینه برنامه",
+        settings_blur_label: "مقدار تاری پس‌زمینه",
+        settings_reset_btn: "بازگشت به تنظیمات اولیه",
+        title_text: "✈ سیستم پیش‌بینی هوشمند قیمت بلیط",
+        origin_label: "مبدا",
+        destination_label: "مقصد",
+        airline_label: "ایرلاین",
+        class_label: "کلاس پروازی",
+        stops_label: "توقف‌ها",
+        stops_direct_option: "بدون توقف",
+        stops_one_option: "یک توقف",
+        days_to_flight_label: "روز تا پرواز",
+        departure_time_label: "ساعت پرواز",
+        purchase_date_label: "تاریخ خرید",
+        flight_date_label: "تاریخ پرواز",
+        day_of_week_label: "روز هفته",
+        submit_btn: "پیش‌بینی قیمت",
+        today_price_prefix: "قیمت امروز: ",
+        signal_buy: "سیگنال: ",
+        signal_hold: "سیگنال: ",
+        signal_wait: "سیگنال: ",
+        signal_buy_text: "خرید ✅",
+        signal_hold_text: "نگه‌دار ⏳",
+        signal_wait_text: "صبر کن ⏳",
+        msg_BUY: "قیمت احتمالاً افزایش می‌یابد — الان بخرید.",
+        msg_WAIT: "احتمال کاهش قیمت وجود دارد — فعلاً صبر کنید.",
+        msg_HOLD: "قیمت پایدار است — هنوز بهترین زمان خرید نیست.",
+        chart_label: "قیمت پیش‌بینی شده",
+        chart_price_prefix: "قیمت: ",
+        chart_day_prefix: "روز ",
+        error_text: "خطا در ارتباط با سرور. مطمئن شو API اجرا شده باشد."
+    },
+    en: {
+        settings_label: "Settings",
+        settings_language_title: "Language",
+        settings_customize_title: "Customize App",
+        settings_bg_btn: "Background image",
+        settings_blur_label: "Background blur amount",
+        settings_reset_btn: "Reset to default",
+        title_text: "✈ Smart Flight Ticket Price Predictor",
+        origin_label: "Origin",
+        destination_label: "Destination",
+        airline_label: "Airline",
+        class_label: "Class",
+        stops_label: "Stops",
+        stops_direct_option: "Direct",
+        stops_one_option: "1 Stop",
+        days_to_flight_label: "Days to flight",
+        departure_time_label: "Departure time",
+        purchase_date_label: "Purchase date",
+        flight_date_label: "Flight date",
+        day_of_week_label: "Day of week",
+        submit_btn: "Predict price",
+        today_price_prefix: "Today's price: ",
+        signal_buy: "Signal: ",
+        signal_hold: "Signal: ",
+        signal_wait: "Signal: ",
+        signal_buy_text: "BUY ✅",
+        signal_hold_text: "HOLD ⏳",
+        signal_wait_text: "WAIT ⏳",
+        msg_BUY: "Price is likely to increase — buy now.",
+        msg_WAIT: "Price might drop — wait for better price.",
+        msg_HOLD: "Price is stable — not the best time yet.",
+        chart_label: "Forecast price",
+        chart_price_prefix: "Price: ",
+        chart_day_prefix: "Day ",
+        error_text: "Server connection error. Make sure the API is running."
+    },
+    tr: {
+        settings_label: "Ayarlar",
+        settings_language_title: "Dil",
+        settings_customize_title: "Uygulamayı kişiselleştir",
+        settings_bg_btn: "Arka plan resmi",
+        settings_blur_label: "Arka plan bulanıklığı",
+        settings_reset_btn: "Varsayılana dön",
+        title_text: "✈ Akıllı Uçak Bileti Fiyat Tahmin Sistemi",
+        origin_label: "Kalkış",
+        destination_label: "Varış",
+        airline_label: "Havayolu",
+        class_label: "Sınıf",
+        stops_label: "Aktarma",
+        stops_direct_option: "Aktarmasız",
+        stops_one_option: "1 Aktarma",
+        days_to_flight_label: "Uçuşa kalan gün",
+        departure_time_label: "Uçuş saati",
+        purchase_date_label: "Satın alma tarihi",
+        flight_date_label: "Uçuş tarihi",
+        day_of_week_label: "Haftanın günü",
+        submit_btn: "Fiyat tahmin et",
+        today_price_prefix: "Bugünkü fiyat: ",
+        signal_buy: "Sinyal: ",
+        signal_hold: "Sinyal: ",
+        signal_wait: "Sinyal: ",
+        signal_buy_text: "AL ✅",
+        signal_hold_text: "BEKLE ⏳",
+        signal_wait_text: "SABRET ⏳",
+        msg_BUY: "Fiyatın artma ihtimali yüksek — şimdi alın.",
+        msg_WAIT: "Fiyat düşebilir — biraz bekleyin.",
+        msg_HOLD: "Fiyat stabil — henüz en iyi zaman değil.",
+        chart_label: "Tahmini fiyat",
+        chart_price_prefix: "Fiyat: ",
+        chart_day_prefix: "Gün ",
+        error_text: "Sunucu bağlantı hatası. API'nin çalıştığından emin olun."
+    }
+};
+
+function applyLanguage(lang){
+    const t = i18n[lang] || i18n['fa'];
+    currentLang = lang;
+
+    document.getElementById('settings_label').innerText = t.settings_label;
+    document.getElementById('settings_language_title').innerText = t.settings_language_title;
+    document.getElementById('settings_customize_title').innerText = t.settings_customize_title;
+    document.getElementById('settings_bg_btn').innerText = t.settings_bg_btn;
+    document.getElementById('settings_blur_label').innerText = t.settings_blur_label;
+    document.getElementById('settings_reset_btn').innerText = t.settings_reset_btn;
+
+    document.getElementById('title_text').innerText = t.title_text;
+    document.getElementById('origin_label').innerText = t.origin_label;
+    document.getElementById('destination_label').innerText = t.destination_label;
+    document.getElementById('airline_label').innerText = t.airline_label;
+    document.getElementById('class_label').innerText = t.class_label;
+    document.getElementById('stops_label').innerText = t.stops_label;
+    document.getElementById('stops_direct_option').innerText = t.stops_direct_option;
+    document.getElementById('stops_one_option').innerText = t.stops_one_option;
+    document.getElementById('days_to_flight_label').innerText = t.days_to_flight_label;
+    document.getElementById('departure_time_label').innerText = t.departure_time_label;
+    document.getElementById('purchase_date_label').innerText = t.purchase_date_label;
+    document.getElementById('flight_date_label').innerText = t.flight_date_label;
+    document.getElementById('day_of_week_label').innerText = t.day_of_week_label;
+    document.getElementById('submit_btn').innerText = t.submit_btn;
+}
+
+function setLanguage(lang){
+    applyLanguage(lang);
+}
+
+function toggleSettingsMenu(){
+    const menu = document.getElementById('settingsMenu');
+    menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+}
+
+document.addEventListener('click', function(e){
+    const menu = document.getElementById('settingsMenu');
+    const btn = document.querySelector('.settings-btn');
+    if(!menu.contains(e.target) && !btn.contains(e.target)){
+        menu.style.display = 'none';
+    }
+});
+
+function changeBackground(event){
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e){
+        document.body.style.backgroundImage = `url(${e.target.result})`;
+        localStorage.setItem('custom_bg', e.target.result);
+    };
+    reader.readAsDataURL(file);
+}
+
+function changeBlur(value){
+    document.getElementById('overlay').style.backdropFilter = `blur(${value}px)`;
+    localStorage.setItem('background_blur', value);
+}
+
+function resetSettings(){
+    document.body.style.backgroundImage = defaultBackground;
+    document.getElementById('overlay').style.backdropFilter = `blur(${defaultBlur}px)`;
+    document.getElementById('blurRange').value = defaultBlur;
+    localStorage.removeItem('custom_bg');
+    localStorage.removeItem('background_blur');
+    applyLanguage('fa');
+}
+
+function restoreSettingsFromStorage(){
+    const savedBg = localStorage.getItem('custom_bg');
+    const savedBlur = localStorage.getItem('background_blur');
+
+    if(savedBg){
+        document.body.style.backgroundImage = `url(${savedBg})`;
+    }
+
+    if(savedBlur !== null){
+        document.getElementById('overlay').style.backdropFilter = `blur(${savedBlur}px)`;
+        document.getElementById('blurRange').value = savedBlur;
+    }else{
+        document.getElementById('overlay').style.backdropFilter = `blur(${defaultBlur}px)`;
+        document.getElementById('blurRange').value = defaultBlur;
+    }
+}
+
+function showError(message){
+    const errorBox = document.getElementById("errorBox");
+    errorBox.style.display = "block";
+    errorBox.innerText = message;
+}
+
+function hideError(){
+    const errorBox = document.getElementById("errorBox");
+    errorBox.style.display = "none";
+    errorBox.innerText = "";
+}
+
+document.getElementById("flightForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    hideError();
+
+    const data = {
+        origin: document.getElementById("origin").value,
+        destination: document.getElementById("destination").value,
+        airline: document.getElementById("airline").value,
+        class_type: document.getElementById("class_type").value,
+        stops: Number(document.getElementById("stops").value),
+        days_to_flight: Number(document.getElementById("days_to_flight").value),
+        departure_time: document.getElementById("departure_time").value,
+        purchase_date: document.getElementById("purchase_date").value,
+        flight_date: document.getElementById("flight_date").value,
+        day_of_week: document.getElementById("day_of_week").value
+    };
+
+    try{
+        const res = await fetch(`${API_BASE_URL}/buy_signal`, {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify(data)
+        });
+
+        if(!res.ok){
+            throw new Error("Request failed");
+        }
+
+        const result = await res.json();
+
+        document.getElementById("resultBox").style.display = "block";
+
+        const t = i18n[currentLang];
+
+        const todayPriceEl = document.getElementById("todayPrice");
+        todayPriceEl.innerText = t.today_price_prefix + Number(result.today_price).toFixed(2);
+
+        const signalTextEl = document.getElementById("signalText");
+        if(result.signal === "BUY"){
+            signalTextEl.innerHTML = t.signal_buy + `<span class='buy'>${t.signal_buy_text}</span>`;
+        }else if(result.signal === "WAIT"){
+            signalTextEl.innerHTML = t.signal_wait + `<span class='wait'>${t.signal_wait_text}</span>`;
+        }else{
+            signalTextEl.innerHTML = t.signal_hold + `<span class='hold'>${t.signal_hold_text}</span>`;
+        }
+
+        let msgKey = "msg_" + result.signal;
+        document.getElementById("message").innerText = t[msgKey] || result.message || "";
+
+        drawChart(result.forecast || []);
+    }catch(err){
+        console.error(err);
+        showError(i18n[currentLang].error_text);
+    }
+});
+
+function drawChart(values){
+    const ctx = document.getElementById("forecastChart").getContext("2d");
+    if(chart) chart.destroy();
+
+    const t = i18n[currentLang];
+
+    chart = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: values.map((_,i) => t.chart_day_prefix + (i+1)),
+            datasets: [{
+                label: t.chart_label,
+                data: values,
+                borderColor: "#00f5ff",
+                backgroundColor: "rgba(0,245,255,0.2)",
+                tension: 0.4,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context){
+                            return t.chart_price_prefix + Number(context.raw).toFixed(2);
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: "#ffffff" }
+                },
+                y: {
+                    ticks: { color: "#ffffff" }
+                }
+            }
+        }
+    });
+}
+
+window.addEventListener('load', () => {
+    restoreSettingsFromStorage();
+    applyLanguage('fa');
+});
+</script>
+
+</body>
+</html>
